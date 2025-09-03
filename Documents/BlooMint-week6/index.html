@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BlooMint — Interactive Assignment</title>
+  <style>
+    /* Simple styling for the demo assignment */
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 12px; color: #222; background: #f5f7fb; }
+    .site-header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    h1 { margin: 0 0 8px 0; font-size: 1.4rem; }
+    .btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; background: white; cursor: pointer; }
+    .tabs { margin: 12px 0; display:flex; gap:8px; }
+    .tab-btn.active { background: #8ecae6; color: #023047; }
+    .tab-content { padding: 12px; border-radius: 8px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .hidden { display:none; }
+    .faq-item { margin-bottom: 8px; }
+    .faq-question { width:100%; text-align:left; padding:8px; border-radius:6px; border:1px solid #eee; background:#fafafa; cursor:pointer; }
+    .faq-question.open { background:#e7f5ff; }
+    .faq-answer { max-height:0; overflow:hidden; transition: max-height 0.25s ease; padding:0 8px; }
+    .faq-answer.open { max-height:200px; padding:8px; }
+    .counter-controls { display:flex; align-items:center; gap:8px; }
+    #count { min-width:30px; display:inline-block; text-align:center; font-weight:600; }
+    #count.negative { color: #c00; }
+    .form-row { margin-bottom:10px; }
+    label { display:block; margin-bottom:4px; }
+    input[type=text], input[type=password] { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
+    .invalid { border-color: #e63946; }
+    small.error { color:#e63946; display:block; min-height:18px; }
+    .form-message.success { color:#2a9d8f; margin-top:8px; }
+    .form-message.error { color:#e63946; margin-top:8px; }
+    /* Dark mode */
+    body.dark { background:#111827; color:#e6eef6; }
+    body.dark .tab-content, body.dark .btn { background: #0b1220; color: #e6eef6; border-color:#233041; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>BlooMint — Interactive Demo</h1>
+    <button id="darkToggle" class="btn">🌙 Toggle Dark</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="learn">Learn</button>
+    <button class="tab-btn" data-tab="shop">Shop</button>
+    <button class="tab-btn" data-tab="tracker">Tracker</button>
+  </nav>
+
+  <main>
+    <section id="learn" class="tab-content">
+      <h2>Learn</h2>
+      <p>Welcome! Try the FAQ and the helpfulness counter below.</p>
+
+      <div class="faq">
+        <div class="faq-item">
+          <button class="faq-question">What is menstrual hygiene?</button>
+          <div class="faq-answer">Menstrual hygiene means using clean materials to manage your period, changing them frequently, and washing your hands and body. It matters for health and comfort.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">How should I dispose used pads?</button>
+          <div class="faq-answer">Wrap used pads in paper and send them to a bin. Do not flush them down the toilet. Many places use small incineration or dedicated sanitary bins.</div>
+        </div>
+      </div>
+
+      <div class="counter">
+        <p>Was this page helpful?</p>
+        <div class="counter-controls">
+          <button id="dec" class="btn">-</button>
+          <span id="count">0</span>
+          <button id="inc" class="btn">+</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="shop" class="tab-content hidden">
+      <h2>Shop</h2>
+      <p>Simple shop placeholder — click Tracker to try the form.</p>
+    </section>
+
+    <section id="tracker" class="tab-content hidden">
+      <h2>Tracker / Sign up</h2>
+      <form id="signupForm" novalidate>
+        <div class="form-row">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" />
+          <small class="error" id="nameError"></small>
+        </div>
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="text" autocomplete="email" />
+          <small class="error" id="emailError"></small>
+        </div>
+        <div class="form-row">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" />
+          <small class="error" id="passwordError"></small>
+        </div>
+        <div class="form-row">
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" name="confirm" type="password" autocomplete="new-password" />
+          <small class="error" id="confirmError"></small>
+        </div>
+        <div class="form-row">
+          <label for="phone">Phone (optional)</label>
+          <input id="phone" name="phone" type="text" autocomplete="tel" />
+          <small class="error" id="phoneError"></small>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn">Submit</button>
+        </div>
+        <div id="formMessage" class="form-message"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const body = document.body;
+      const darkToggle = document.getElementById('darkToggle');
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      const faqQuestions = document.querySelectorAll('.faq-question');
+      let count = 0;
+      const countDisplay = document.getElementById('count');
+      const incBtn = document.getElementById('inc');
+      const decBtn = document.getElementById('dec');
+      const form = document.getElementById('signupForm');
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const confirmInput = document.getElementById('confirm');
+      const phoneInput = document.getElementById('phone');
+      const formMessage = document.getElementById('formMessage');
+
+      if (localStorage.getItem('dark') === '1') body.classList.add('dark');
+      darkToggle.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        localStorage.setItem('dark', body.classList.contains('dark') ? '1' : '0');
+      });
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          tabButtons.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(tc => tc.classList.add('hidden'));
+          e.currentTarget.classList.add('active');
+          document.getElementById(e.currentTarget.dataset.tab).classList.remove('hidden');
+        });
+      });
+
+      faqQuestions.forEach(q => {
+        q.addEventListener('click', () => {
+          q.classList.toggle('open');
+          q.nextElementSibling.classList.toggle('open');
+        });
+      });
+
+      function updateCount() {
+        countDisplay.textContent = count;
+        if (count < 0) countDisplay.classList.add('negative');
+        else countDisplay.classList.remove('negative');
+      }
+      incBtn.addEventListener('click', () => { count++; updateCount(); });
+      decBtn.addEventListener('click', () => { count--; updateCount(); });
+      updateCount();
+
+      function showError(input, msg) {
+        document.getElementById(input.id+'Error').textContent = msg;
+        input.classList.add('invalid');
+      }
+      function clearError(input) {
+        document.getElementById(input.id+'Error').textContent = '';
+        input.classList.remove('invalid');
+      }
+
+      function validateName() { const v=nameInput.value.trim(); if(v.length<2||!/^[A-Za-z\s]+$/.test(v)){showError(nameInput,'Enter valid name');return false;} clearError(nameInput); return true; }
+      function validateEmail() { const v=emailInput.value.trim(); if(!/^\S+@\S+\.\S+$/.test(v)){showError(emailInput,'Enter valid email');return false;} clearError(emailInput); return true; }
+      function validatePassword() { const v=passwordInput.value; if(!/^(?=.[A-Za-z])(?=.\d)(?=.[!@#$%^&]).{8,}$/.test(v)){showError(passwordInput,'Password too weak');return false;} clearError(passwordInput); return true; }
+      function validateConfirm() { if(confirmInput.value!==passwordInput.value){showError(confirmInput,'Passwords do not match');return false;} clearError(confirmInput); return true; }
+      function validatePhone() { const v=phoneInput.value.trim(); if(v===""){clearError(phoneInput); return true;} if(!/^\d{7,15}$/.test(v)){showError(phoneInput,'Phone must be 7–15 digits');return false;} clearError(phoneInput); return true; }
+
+      function validateForm() {
+        const ok = validateName() && validateEmail() && validatePassword() && validateConfirm() && validatePhone();
+        if (ok) { formMessage.textContent='Success! Form valid (demo).'; formMessage.className='form-message success'; }
+        else { formMessage.textContent='Please fix the errors above.'; formMessage.className='form-message error'; }
+        return ok;
+      }
+
+      [nameInput,emailInput,passwordInput,confirmInput,phoneInput].forEach(i=>{
+        i.addEventListener('input',()=>{ if(i===nameInput)validateName(); if(i===emailInput)validateEmail(); if(i===passwordInput)validatePassword(); if(i===confirmInput)validateConfirm(); if(i===phoneInput)validatePhone(); });
+      });
+
+      form.addEventListener('submit',(e)=>{
+        e.preventDefault();
+        if(validateForm()){
+          setTimeout(()=>{form.reset();formMessage.textContent='Form cleared (demo).';},700);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
